@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: teamcity-service
+spec:
+  type: NodePort
+  ports:
+    - port: 8111
+      targetPort: 8111
+      nodePort: 31111
+  selector:
+    app: teamcity
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: teamcity
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: teamcity
+  template:
+    metadata:
+      labels:
+        app: teamcity
+    spec:
+      containers:
+        - name: teamcity
+          image: jetbrains/teamcity-server
+          ports:
+            - containerPort: 8111
+          volumeMounts:
+            - name: teamcity-data
+              mountPath: /data/teamcity_server/datadir
+            - name: teamcity-logs
+              mountPath: /opt/teamcity/logs
+      volumes:
+        - name: teamcity-data
+          emptyDir: {}
+        - name: teamcity-logs
+          emptyDir: {}
